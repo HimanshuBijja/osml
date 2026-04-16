@@ -1,7 +1,7 @@
 #include <stdio.h>
 
 int main() {
-    int msize, psize, pages, frames;
+    int msize, psize, pages, n, i;
 
     printf("Enter size of main memory: ");
     scanf("%d", &msize);
@@ -10,27 +10,25 @@ int main() {
     scanf("%d", &psize);
 
     pages = msize / psize;
-    printf("Total number of pages available in memory = %d\n", pages);
+    printf("Total pages available = %d\n", pages);
 
     printf("Enter number of processes: ");
-    scanf("%d", &frames);
+    scanf("%d", &n);
 
-    int process[frames];
-
-    for(int i = 0; i < frames; i++) {
+    int process;
+    for (i = 0; i < n; i++) {
         printf("Enter size of process %d: ", i + 1);
-        scanf("%d", &process[i]);
+        scanf("%d", &process);
 
-        int req_pages = process[i] / psize;
+        int req = process / psize;
+        if (process % psize != 0)
+            req++;
 
-        if(process[i] % psize != 0)
-            req_pages++;
-
-        if(req_pages <= pages) {
-            printf("Process %d is allocated %d pages\n", i + 1, req_pages);
-            pages -= req_pages;
+        if (req <= pages) {
+            printf("Process %d allocated %d pages\n", i + 1, req);
+            pages -= req;
         } else {
-            printf("Process %d cannot be allocated (Not enough memory)\n", i + 1);
+            printf("Process %d cannot be allocated\n", i + 1);
         }
     }
 
