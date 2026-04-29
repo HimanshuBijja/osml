@@ -1,0 +1,340 @@
+1) FCFS (Full Code)
+#include <stdio.h>
+
+int main() {
+    int n, i, j;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], wt[n], tat[n], ct[n], pid[n];
+
+    printf("Enter AT and BT:\n");
+    for(i = 0; i < n; i++) {
+        pid[i] = i + 1;
+        scanf("%d%d", &at[i], &bt[i]);
+    }
+
+    for(i = 0; i < n - 1; i++)
+        for(j = i + 1; j < n; j++)
+            if(at[i] > at[j]) {
+                int t;
+                t=at[i]; at[i]=at[j]; at[j]=t;
+                t=bt[i]; bt[i]=bt[j]; bt[j]=t;
+                t=pid[i]; pid[i]=pid[j]; pid[j]=t;
+            }
+
+    ct[0] = at[0] + bt[0];
+    tat[0] = ct[0] - at[0];
+    wt[0] = tat[0] - bt[0];
+
+    for(i = 1; i < n; i++) {
+        ct[i] = (ct[i-1] < at[i]) ? at[i] + bt[i] : ct[i-1] + bt[i];
+        tat[i] = ct[i] - at[i];
+        wt[i] = tat[i] - bt[i];
+    }
+
+    printf("\nPID\tAT\tBT\tCT\tTAT\tWT\n");
+    for(i = 0; i < n; i++)
+        printf("%d\t%d\t%d\t%d\t%d\t%d\n", pid[i], at[i], bt[i], ct[i], tat[i], wt[i]);
+
+    return 0;
+}
+
+
+
+
+
+2) SJF (Preemptive)
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+    int n, i, time = 0, complete = 0;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], wt[n], tat[n];
+
+    printf("Enter AT and BT:\n");
+    for(i = 0; i < n; i++) {
+        scanf("%d%d", &at[i], &bt[i]);
+        rt[i] = bt[i];
+    }
+
+    while(complete < n) {
+        int idx = -1, min = INT_MAX;
+
+        for(i = 0; i < n; i++)
+            if(at[i] <= time && rt[i] > 0 && rt[i] < min) {
+                min = rt[i];
+                idx = i;
+            }
+
+        if(idx == -1) {
+            time++;
+            continue;
+        }
+
+        rt[idx]--;
+        time++;
+
+        if(rt[idx] == 0) {
+            complete++;
+            tat[idx] = time - at[idx];
+            wt[idx] = tat[idx] - bt[idx];
+        }
+    }
+
+    printf("\nProcess\tTAT\tWT\n");
+    for(i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\n", i+1, tat[i], wt[i]);
+
+    return 0;
+}
+
+
+3) Priority (Preemptive)
+#include <stdio.h>
+#include <limits.h>
+
+int main() {
+    int n, i, time = 0, complete = 0;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], pr[n], wt[n], tat[n];
+
+    printf("Enter AT, BT, Priority:\n");
+    for(i = 0; i < n; i++) {
+        scanf("%d%d%d", &at[i], &bt[i], &pr[i]);
+        rt[i] = bt[i];
+    }
+
+    while(complete < n) {
+        int idx = -1, high = INT_MAX;
+
+        for(i = 0; i < n; i++)
+            if(at[i] <= time && rt[i] > 0 && pr[i] < high) {
+                high = pr[i];
+                idx = i;
+            }
+
+        if(idx == -1) {
+            time++;
+            continue;
+        }
+
+        rt[idx]--;
+        time++;
+
+        if(rt[idx] == 0) {
+            complete++;
+            tat[idx] = time - at[idx];
+            wt[idx] = tat[idx] - bt[idx];
+        }
+    }
+
+    printf("\nProcess\tTAT\tWT\n");
+    for(i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\n", i+1, tat[i], wt[i]);
+
+    return 0;
+}
+
+
+
+4) Round Robin
+#include <stdio.h>
+
+int main() {
+    int n, tq, i, time = 0, remain;
+    printf("Enter number of processes: ");
+    scanf("%d", &n);
+
+    int at[n], bt[n], rt[n], wt[n], tat[n];
+
+    printf("Enter AT and BT:\n");
+    for(i = 0; i < n; i++) {
+        scanf("%d%d", &at[i], &bt[i]);
+        rt[i] = bt[i];
+    }
+
+    printf("Enter Time Quantum: ");
+    scanf("%d", &tq);
+
+    remain = n;
+
+    while(remain > 0) {
+        int done = 1;
+
+        for(i = 0; i < n; i++) {
+            if(at[i] <= time && rt[i] > 0) {
+                done = 0;
+
+                if(rt[i] <= tq) {
+                    time += rt[i];
+                    rt[i] = 0;
+                    remain--;
+
+                    tat[i] = time - at[i];
+                    wt[i] = tat[i] - bt[i];
+                } else {
+                    time += tq;
+                    rt[i] -= tq;
+                }
+            }
+        }
+
+        if(done) time++;
+    }
+
+    printf("\nProcess\tTAT\tWT\n");
+    for(i = 0; i < n; i++)
+        printf("P%d\t%d\t%d\n", i+1, tat[i], wt[i]);
+
+    return 0;
+}
+
+5) FIFO Page Replacement
+#include <stdio.h>
+
+int main() {
+    int n,f,i,j,k=0,fault=0;
+
+    printf("Enter number of pages: ");
+    scanf("%d",&n);
+
+    int page[n];
+    printf("Enter pages:\n");
+    for(i=0;i<n;i++) scanf("%d",&page[i]);
+
+    printf("Enter number of frames: ");
+    scanf("%d",&f);
+
+    int frame[f];
+    for(i=0;i<f;i++) frame[i]=-1;
+
+    for(i=0;i<n;i++) {
+        int found=0;
+
+        for(j=0;j<f;j++)
+            if(frame[j]==page[i]) found=1;
+
+        if(!found) {
+            frame[k]=page[i];
+            k=(k+1)%f;
+            fault++;
+        }
+    }
+
+    printf("\nTotal Page Faults = %d\n", fault);
+    return 0;
+}
+
+
+
+
+
+
+
+
+
+
+6) LRU Page Replacement
+#include <stdio.h>
+
+int main() {
+    int n,f,i,j,fault=0;
+
+    printf("Enter number of pages: ");
+    scanf("%d",&n);
+
+    int page[n];
+    printf("Enter pages:\n");
+    for(i=0;i<n;i++) scanf("%d",&page[i]);
+
+    printf("Enter number of frames: ");
+    scanf("%d",&f);
+
+    int frame[f], time[f], count=0;
+
+    for(i=0;i<f;i++) {
+        frame[i]=-1;
+        time[i]=0;
+    }
+
+    for(i=0;i<n;i++) {
+        int found=0;
+
+        for(j=0;j<f;j++)
+            if(frame[j]==page[i]) {
+                time[j]=++count;
+                found=1;
+            }
+
+        if(!found) {
+            int pos=0;
+            for(j=1;j<f;j++)
+                if(time[j]<time[pos]) pos=j;
+
+            frame[pos]=page[i];
+            time[pos]=++count;
+            fault++;
+        }
+    }
+
+    printf("\nTotal Page Faults = %d\n", fault);
+    return 0;
+}
+
+
+
+
+7) LFU Page Replacement
+#include <stdio.h>
+
+int main() {
+    int n,f,i,j,fault=0;
+
+    printf("Enter number of pages: ");
+    scanf("%d",&n);
+
+    int page[n];
+    printf("Enter pages:\n");
+    for(i=0;i<n;i++) scanf("%d",&page[i]);
+
+    printf("Enter number of frames: ");
+    scanf("%d",&f);
+
+    int frame[f], freq[f];
+
+    for(i=0;i<f;i++) {
+        frame[i]=-1;
+        freq[i]=0;
+    }
+
+    for(i=0;i<n;i++) {
+        int found=0;
+
+        for(j=0;j<f;j++)
+            if(frame[j]==page[i]) {
+                freq[j]++;
+                found=1;
+            }
+
+        if(!found) {
+            int pos=0;
+            for(j=1;j<f;j++)
+                if(freq[j]<freq[pos]) pos=j;
+
+            frame[pos]=page[i];
+            freq[pos]=1;
+            fault++;
+        }
+    }
+
+    printf("\nTotal Page Faults = %d\n", fault);
+    return 0;
+}
+
+
